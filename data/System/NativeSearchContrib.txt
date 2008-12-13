@@ -14,8 +14,6 @@ By default Foswiki searches its database by [[http://en.wikipedia.org/wiki/Fork_
 
 ---++ Installation Instructions
 
-If you are installing on a TWiki version before 4.1.2, please refer to TWiki:Codev.NativeSearch for instructions. Note that an old version of the package was pre-installed with 4.1.2; that pre-installation will be overwritten by this package.
-
 Before you start, there are some prerequisites.
    1 you must have =ExtUtils::MakeMaker= installed (available from CPAN)
    1 you must have a C compiler (=gcc= has been tested). Most Unix/Linux systems will have this already. On Win32 !MinGW is recommended.
@@ -31,18 +29,18 @@ Before you start, there are some prerequisites.
 $ cd tools/native_search
 $ perl Makefile.PL
 $ make install
-$ perl test.pl -i -l NativeTWikiSearch test.pl Makefile.PL NativeTWikiSearch.xs
+$ perl test.pl -i -l FoswikiNativeSearch test.pl Makefile.PL FoswikiNativeSearch.xs
 </verbatim>
 (on Win32 you should use =nmake=)
 
 Make sure that =perl test.pl= returns something sane, and _NOT_ a
 =Segmentation fault=.
-(=test.pl= is simply a stub interface to the native search, so it behaves like =grep=. The test above simply greps for the string "NativeSearch" in the files Makefile.PL and !NativeTWikiSearch.xs)
+(=test.pl= is simply a stub interface to the native search, so it behaves like =grep=. The test above simply greps for the string "NativeSearch" in the files Makefile.PL and !FoswikiNativeSearch.xs)
 
 *If you do not have administrator (root) access to the server*, you can still
 install. Follow the steps above, but use =perl Makefile.PL INSTALLBASE=/your/dir= to install to a different directory. Exactly where you install depends on your system configuration.
 
-Now, in [[%SCRIPTURL{configure}%][configure]], under "Store Settings", you should be able to select the search algorithm =Foswiki::Store::SearchAlgorithms::Native= (click the <input type="button" style="background-color:#eef" value="Yes, I've read all the documentation"/> button first if you have TWiki 4.2 or later or Foswiki).
+Now, in [[%SCRIPTURL{configure}%][configure]], under "Store Settings", you should be able to select the search algorithm =Foswiki::Store::SearchAlgorithms::Native= (click the <input type="button" style="background-color:#eef" value="Yes, I've read all the documentation"/> button first).
 
 Run a Foswiki search, and watch the web server error log for any problems.
 
@@ -56,18 +54,14 @@ Many thanks to the following sponsors for supporting this work:
    * Wind River Systems http://windriver.com
 
 |  Contrib Author(s): | Crawford Currie http://c-dot.co.uk |
-|  Copyright: | &copy; !WikiRing 2007 |
+|  Copyright: | &copy; Crawford Currie 2007-2008 |
 |  License: | [[http://www.gnu.org/licenses/gpl.html][GPL (Gnu General Public License)]] |
 |  Contrib Version: | %$VERSION% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
 |  Dependencies: | %$DEPENDENCIES% |
-|  Contrib Home: | http://twiki.org/cgi-bin/view/Plugins/NativeSearchContrib |
-|  Feedback: | http://twiki.org/cgi-bin/view/Plugins/NativeSearchContribDev |
-|  Appraisal: | http://twiki.org/cgi-bin/view/Plugins/NativeSearchContribAppraisal |
+|  Contrib Home: | http://foswiki.org/Extensions/NativeSearchContrib |
 
-__Related Topics:__ [[%SYSTEMWEB%.Contribs][Contribs]], %SYSTEMWEB%.DeveloperDocumentationCategory, %SYSTEMWEB%.AdminDocumentationCategory, %SYSTEMWEB%.DefaultPreferences, %USERSWEB%.SitePreferences
-
-<!-- Do _not_ attempt to edit this topic; it is auto-generated. Please add comments/questions/remarks to the feedback topic on twiki.org instead. -->
+<!-- Do _not_ attempt to edit this topic; it is auto-generated. Please add comments/questions/remarks to the feedback topic on foswiki.org instead. -->
 
 %META:FILEATTACHMENT{name="wikiringlogo20x20.png" attr="h" comment="" version="1"}%
 %META:FILEATTACHMENT{name="logo.gif" attr="h" comment="" version="1"}%

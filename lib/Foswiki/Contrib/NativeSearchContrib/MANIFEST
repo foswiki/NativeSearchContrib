@@ -1,0 +1,11 @@
+# Release manifest for NativeSearchContrib
+data/System/NativeSearchContrib.txt 0644 Documentation
+lib/Foswiki/Contrib/NativeSearchContrib.pm 0444
+lib/Foswiki/Store/SearchAlgorithms/Native.pm 0444
+tools/native_search/FoswikiNativeSearch.pm 0555
+tools/native_search/cgrep.c 0555
+tools/native_search/Makefile.PL 0555
+tools/native_search/test.pl 0555
+tools/native_search/FoswikiNativeSearch.xs 0555
+pub/System/NativeSearchContrib/wikiringlogo20x20.png 0660
+pub/System/NativeSearchContrib/logo.gif 0660

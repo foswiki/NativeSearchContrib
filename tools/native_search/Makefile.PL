@@ -1,8 +1,8 @@
-# Makefile for NativeTWikiSearch module
+# Makefile for FoswikiNativeSearch module
 use ExtUtils::MakeMaker;
 WriteMakefile(
-   NAME => 'NativeTWikiSearch',
-   OBJECT => 'NativeTWikiSearch.o cgrep.o',
+   NAME => 'FoswikiNativeSearch',
+   OBJECT => 'FoswikiNativeSearch.o cgrep.o',
    LIBS => [ '-lpcre' ],
    CCFLAGS => "-g",
    LD => "gcc",

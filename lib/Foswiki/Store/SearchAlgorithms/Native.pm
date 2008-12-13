@@ -1,7 +1,11 @@
 #
-# Copyright (C) 2007 TWiki Contributors. All Rights Reserved.
-# TWiki Contributors are listed in the AUTHORS file in the root
+# Copyright (C) 2008 Foswiki Contributors. All Rights Reserved.
+# Foswiki Contributors are listed in the AUTHORS file in the root
 # of this distribution. NOTE: Please extend that file, not this notice.
+#
+# Additional copyrights apply to some or all of the code in this
+# module, as follows:
+# Copyright (C) 2007 TWiki Contributors. All Rights Reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -15,14 +19,14 @@
 #
 # As per the GPL, removal of this notice is prohibited.
 #
-package TWiki::Store::SearchAlgorithms::Native;
+package Foswiki::Store::SearchAlgorithms::Native;
 
 use Assert;
-use NativeTWikiSearch;
+use FoswikiNativeSearch;
 
 =pod
 
----+ package TWiki::Store::SearchAlgorithms::Native
+---+ package Foswiki::Store::SearchAlgorithms::Native
 
 Native implementation of the RCS cache search. Requires tools/native_search
 to be built and installed.
@@ -49,7 +53,7 @@ sub search {
     push(@fs, '-l') if $options->{files_without_match};
     push(@fs, $searchString);
     push(@fs, map { "$sDir/$_.txt" } @$topics);
-    my $matches = NativeTWikiSearch::cgrep(\@fs);
+    my $matches = FoswikiNativeSearch::cgrep(\@fs);
     my %seen;
     if (defined($matches)) {
         for (@$matches) {

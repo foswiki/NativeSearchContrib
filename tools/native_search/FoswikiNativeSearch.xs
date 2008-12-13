@@ -81,7 +81,7 @@ void XS_pack_charPtrPtr(SV* st, char **s, int n) {
     free(s);
 }
 
-MODULE = NativeTWikiSearch     PACKAGE = NativeTWikiSearch
+MODULE = FoswikiNativeSearch     PACKAGE = FoswikiNativeSearch
 
 char**
 cgrep(argv)
