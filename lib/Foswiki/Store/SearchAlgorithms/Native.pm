@@ -60,6 +60,7 @@ sub search {
             # Note use of / and \ as dir separators, to support
             # Winblows
             if (/([^\/\\]*)\.txt(:(.*))?$/) {
+                # Implicit untaint OK; data from search
                 push( @{$seen{$1}}, $3 );
             }
         }
