@@ -5,7 +5,7 @@ package FoswikiNativeSearch;
 
 require Exporter;
 require DynaLoader;
-@ISA = qw(Exporter DynaLoader);
+@ISA    = qw(Exporter DynaLoader);
 @EXPORT = qw( cgrep );
 
 bootstrap FoswikiNativeSearch;
