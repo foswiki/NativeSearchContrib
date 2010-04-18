@@ -6,9 +6,9 @@ One line description, required for extensions repository catalog.
 <a style="text-decoration:none" href="http://wikiring.com"><img style="float:right" src="%ATTACHURLPATH%/logo.gif" /></a>
 %SHORTDESCRIPTION%
 
-By default Foswiki searches its database by [[http://en.wikipedia.org/wiki/Fork_%28operating_system%29][forking]] the standard [[http://en.wikipedia.org/wiki/Grep][grep]] program in a sub-process to search through the text files in the database cache. This is usually pretty fast, but unfortunately in some environments (notably when running with [[http://perl.apache.org/][Apache mod_perl]]) forking a sub-process is very expensive, and another approach is needed.
+By default the RCS-based store in Foswiki searches content by [[http://en.wikipedia.org/wiki/Fork_%28operating_system%29][forking]] the standard [[http://en.wikipedia.org/wiki/Grep][grep]] program in a sub-process to search through the text files in the database cache. This is usually pretty fast, but unfortunately in some environments (notably when running with [[http://perl.apache.org/][Apache mod_perl]]) forking a sub-process is very expensive, and another approach is needed.
 
-!NativeSearch is a c-code module that can be plugged into Foswiki to replace the default searching algorithm. It publishes an [[http://en.wikipedia.org/wiki/XS_(Perl)][XS]] interface that allows it to be called from Perl, without having to fork a sub-process. It has comparable performance to the standard forking search in most environments, but is often significantly faster than forked search when Foswiki is run under a CGI accelerator. The effect is most pronounced with mod_perl, but is also there for [[http://www.daemoninc.com/SpeedyCGI/][SpeedyCGI]].
+!NativeSearchContrib contains a compiled code module that can be plugged into Foswiki to replace the default searching algorithm. It publishes an [[http://en.wikipedia.org/wiki/XS_(Perl)][XS]] interface that allows it to be called directly from Perl, without having to fork a sub-process. It has comparable performance to the standard forking search in most environments, but is often significantly faster than forked search when Foswiki is run under a CGI accelerator. The effect is most pronounced with mod_perl, but is also there for [[http://www.daemoninc.com/SpeedyCGI/][SpeedyCGI]].
 
 *You require shell access to the server to install this module*.
 
@@ -40,11 +40,14 @@ Make sure that =perl test.pl= returns something sane, and _NOT_ a
 *If you do not have administrator (root) access to the server*, you can still
 install. Follow the steps above, but use =perl Makefile.PL INSTALLBASE=/your/dir= to install to a different directory. Exactly where you install depends on your system configuration.
 
-Now, in [[%SCRIPTURL{configure}%][configure]], under "Store Settings", you should be able to select the search algorithm =Foswiki::Store::SearchAlgorithms::Native= (click the <input type="button" style="background-color:#eef" value="Yes, I've read all the documentation"/> button first).
+Now, in [[%SCRIPTURL{configure}%][configure]], in the "Store" section, you should be able to select the search algorithm =Foswiki::Store::SearchAlgorithms::Native=.
 
 Run a Foswiki search, and watch the web server error log for any problems.
 
 Because performance can differ widely between two apparently similar webserver configurations, you are recommended to do your own benchmarking and select the search algorithm that performs best for you.
+
+You may also want to read up on other search engines such as
+Foswiki:Extensions.KinoSearchContrib, which may address your requirements better.
 
 ---++ Info
 
