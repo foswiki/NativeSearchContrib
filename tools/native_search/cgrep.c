@@ -54,8 +54,6 @@ void cleanup(char** argv) {
     free(argv);
 }
 
-
-
 /* Do a grep. Arguments are provided in argv, options first, then the
  * pattern, then the file names. -i (case insensitive) and -l (report
  * matching file names only) are the only options supported. */
@@ -88,8 +86,8 @@ char** cgrep(char** argv) {
         } else if (strcmp(arg, "-l") == 0) {
             justFiles = 1;
         } else {
-            /* Convert \< and \> to \b in the pattern. GNU grep supports
-               them, but pcre doesn't :-( */
+            /* Convert \< and \> to \b in the pattern. Foswiki 1.0.9 and
+               earlier use them, but there is no PCRE support. */
             if (*arg) {
                 for (linebuf = arg + 1; *linebuf; linebuf++) {
                     if (*linebuf == '\\' && *(linebuf-1) != '\\' &&
@@ -159,7 +157,7 @@ char** cgrep(char** argv) {
             }        
             fclose(f);
         } else {
-            warn("Open failed %d", errno);
+            warn("Open '%s' failed %s\n", fname, strerror(errno));
         }
     }
     free(linebuf);
