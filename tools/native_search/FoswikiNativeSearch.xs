@@ -9,16 +9,13 @@
 #include "XSUB.h"
 
 /*
- * Unpack perl args into an array of (read only) strings. The function name
+ * Unpack perl args into a null-terminated array of strings. The function name
  * is dictated by the mapping in the default typemap i.e.
  * (char** -> T_PACKEDARRAY -> XS_unpack_charPtrPtr
+ * The array of strings is allocated on the heap.
  */
 char ** XS_unpack_charPtrPtr(SV* rv) {
 	AV *av;
-	SV **ssv;
-	char **s;
-	int avlen;
-	int x;
 
 	if (SvROK(rv) && (SvTYPE(SvRV(rv)) == SVt_PVAV))
 		av = (AV*)SvRV(rv);
@@ -27,58 +24,49 @@ char ** XS_unpack_charPtrPtr(SV* rv) {
 		return ((char**)NULL);
 	}
 
-	/* is it empty? */
-	avlen = av_len(av);
-	if (avlen < 0){
-		warn("unpack_args: array was empty");
-		return ((char**)NULL);
-	}
+	int length = av_len(av) + 1; /* av_len is the last index */
 
-	/* av_len+2 == number of strings, plus 1 for an end-of-array sentinel.
-	 */
-	s = (char **)malloc(sizeof(char*) * (avlen + 2));
-	if (s == NULL){
-		warn("unpack_args: unable to malloc char**");
-		return ((char**)NULL);
-	}
-	for (x = 0; x <= avlen; ++x){
-        s[x] = (char*)NULL;
-		ssv = av_fetch(av, x, 0);
-		if (ssv != NULL){
-            s[x] = (char *)malloc( SvCUR(*ssv) + 1 );
-            // Test commented out; fails with some perl versions, for no
-            // good reason
-			//if (SvPOK(*ssv))
-				strcpy(s[x], SvPV(*ssv, PL_na));
-			//else
-			//	warn("unpack_args: array elem %d was not a string.", x);
-		}
-	}
-	s[x] = (char*)NULL; /* sentinel */
+    /* array is null-terminated */
+    char ** s = (char **)calloc(length + 1, sizeof(char*));
+    if (!s) {
+    	warn("unpack_args: unable to allocate char**");
+    	return ((char**)NULL);
+    }
+
+    int i;
+    for (i = 0; i < length; i++) {
+    	SV ** ssv = av_fetch(av, i, 0);
+    	if (ssv) {
+            s[i] = (char *)calloc( SvCUR(*ssv) + 1, sizeof(char) );
+            /* *Requires* that data be char strings */
+     		strcpy(s[i], SvPV(*ssv, PL_na));
+    	}
+    }
 	return s;
 }
 
 /*
- * Convert a C char** to a Perl AV*, freeing the char** and the strings
+ * Convert a char** to a Perl AV*, freeing the char** and the strings
  * stored in it.  The function name is dictated by the mapping in the
  * default typemap i.e.
  * (char** -> T_PACKEDARRAY -> XS_pack_charPtrPtr
  */
 void XS_pack_charPtrPtr(SV* st, char **s, int n) {
 	AV *av = newAV();
-	SV *sv;
-	char **c;
-    if (!s)
-        return;
-	for(c = s; *c; c++){
-		sv = newSVpv(*c, 0);
-		av_push(av, sv);
-        free(*c);
-	}
-	sv = newSVrv(st, NULL);	  /* upgrade stack SV to an RV */
+
+    if (s) {
+    	char **c;
+    	for (c = s; *c; c++) {
+    		SV * sv = newSVpv(*c, 0);
+    		av_push(av, sv);
+            free(*c);
+    	}
+        free(s);
+    }
+
+	SV * sv = newSVrv(st, NULL);	  /* upgrade stack SV to an RV */
 	SvREFCNT_dec(sv);         /* discard */
 	SvRV(st) = (SV*)av;       /* make stack RV point at our AV */
-    free(s);
 }
 
 MODULE = FoswikiNativeSearch     PACKAGE = FoswikiNativeSearch
@@ -87,4 +75,4 @@ char**
 cgrep(argv)
 	char ** argv
     PREINIT:
-        int count_charPtrPtr;
+        int count_charPtrPtr; /* Dummy, unused */

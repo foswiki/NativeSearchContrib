@@ -160,6 +160,7 @@ char** cgrep(char** argv) {
             warn("Open '%s' failed %s\n", fname, strerror(errno));
         }
     }
+    free(pattern);
     free(linebuf);
     result = _backup(matchCacheSize, matchCache, result);
     cleanup(argv);

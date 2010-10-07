@@ -3,8 +3,6 @@ package Foswiki::Store::SearchAlgorithms::Native;
 
 use Assert;
 use FoswikiNativeSearch ();
-use Foswiki::Search::InfoCache ();
-use Foswiki::Search::ResultSet ();
 
 =pod
 
@@ -13,11 +11,13 @@ use Foswiki::Search::ResultSet ();
 Native implementation of the RCS cache search. Requires tools/native_search
 to be built and installed.
 
+Rude and crude, this makes no attempt to handle UTF-8.
+
 ---++ query($searchString, $topics, $options, $sDir) -> \%seen
 Search .txt files in $dir for $string. See RcsFile::searchInWebContent
 for details.
 
-Rude and crude, this makes no attempt to handle UTF-8.
+Foswiki 1.1 only
 
 SMELL: 'query' and '_webQuery' are duplicated from
 Foswiki::Store::SearchAlgorithms::Forking - doesn't seem to be any
@@ -28,6 +28,10 @@ sensible way to enable re-use.
 sub query {
     my ( $query, $inputTopicSet, $session, $options ) = @_;
 
+    # These are loaded by require because 1.0 doesn't have them
+    require Foswiki::Search::InfoCache;
+    require Foswiki::Search::ResultSet;
+
     if (( @{ $query->{tokens} } ) == 0) {
         return new Foswiki::Search::InfoCache($session, '');
     }
@@ -37,7 +41,8 @@ sub query {
     my $isAdmin = $session->{users}->isAdmin( $session->{user} );
 
     my $searchAllFlag = ( $webNames =~ /(^|[\,\s])(all|on)([\,\s]|$)/i );
-    my @webs = Foswiki::Search::InfoCache::_getListOfWebs( $webNames, $recurse, $searchAllFlag );
+    my @webs = Foswiki::Search::InfoCache::_getListOfWebs(
+        $webNames, $recurse, $searchAllFlag );
 
     my @resultCacheList;
     foreach my $web (@webs) {
@@ -45,7 +50,8 @@ sub query {
         next unless $session->webExists($web);
 
         my $webObject = Foswiki::Meta->new( $session, $web );
-        my $thisWebNoSearchAll = $webObject->getPreference('NOSEARCHALL') || '';
+        my $thisWebNoSearchAll = $webObject->getPreference('NOSEARCHALL')
+          || '';
 
         # make sure we can report this web on an 'all' search
         # DON'T filter out unless it's part of an 'all' search.
@@ -55,11 +61,14 @@ sub query {
             && ( $thisWebNoSearchAll =~ /on/i || $web =~ /^[\.\_]/ )
             && $web ne $session->{webName} );
         
-        my $infoCache = _webQuery($query, $web, $inputTopicSet, $session, $options);
+        my $infoCache = _webQuery(
+            $query, $web, $inputTopicSet, $session, $options);
         $infoCache->sortResults( $options );
         push(@resultCacheList, $infoCache);
     }
-    my $resultset = new Foswiki::Search::ResultSet(\@resultCacheList, $options->{groupby}, $options->{order}, Foswiki::isTrue( $options->{reverse} ));
+    my $resultset = new Foswiki::Search::ResultSet(
+        \@resultCacheList, $options->{groupby}, $options->{order},
+        Foswiki::isTrue( $options->{reverse} ));
     #TODO: $options should become redundant
     $resultset->sortResults( $options );
     return $resultset;
@@ -70,7 +79,7 @@ sub query {
 sub _webQuery {
     my ( $query, $web, $inputTopicSet, $session, $options ) = @_;
     ASSERT( scalar( @{ $query->{tokens} } ) > 0 ) if DEBUG;
-#print STDERR "ForkingSEARCH(".join(', ', @{ $query->{tokens} }).")\n";
+    #print STDERR "ForkingSEARCH(".join(', ', @{ $query->{tokens} }).")\n";
     # default scope is 'text'
     $options->{'scope'} = 'text'
       unless ( defined( $options->{'scope'} )
@@ -81,12 +90,14 @@ sub _webQuery {
         #then we start with the whole web
         #TODO: i'm sure that is a flawed assumption
         my $webObject = Foswiki::Meta->new( $session, $web );
-        $topicSet = Foswiki::Search::InfoCache::getTopicListIterator( $webObject, $options );
+        $topicSet = Foswiki::Search::InfoCache::getTopicListIterator(
+            $webObject, $options );
     }
     ASSERT( UNIVERSAL::isa( $topicSet, 'Foswiki::Iterator' ) ) if DEBUG;
 
-#print STDERR "######## Forking search ($web) tokens ".scalar(@{$query->{tokens}})." : ".join(',', @{$query->{tokens}})."\n";
-# AND search - search once for each token, ANDing result together
+    #print STDERR "######## Forking search ($web) tokens "
+    # .scalar(@{$query->{tokens}})." : ".join(',', @{$query->{tokens}})."\n";
+    # AND search - search once for each token, ANDing result together
     foreach my $token ( @{ $query->{tokens} } ) {
 
         my $tokenCopy = $token;
@@ -101,8 +112,9 @@ sub _webQuery {
         unless ( $options->{'scope'} eq 'text' ) {
             my $qtoken = $tokenCopy;
 
-# FIXME I18N
-# http://foswiki.org/Tasks/Item1646 this causes us to use/leak huge amounts of memory if called too often
+            # FIXME I18N
+            # http://foswiki.org/Tasks/Item1646 this causes us to use/leak
+            # huge amounts of memory if called too often
             $qtoken = quotemeta($qtoken) if ( $options->{'type'} ne 'regex' );
 
             my @topicList;
@@ -141,7 +153,8 @@ sub _webQuery {
             $topicSet->reset();
             while ( $topicSet->hasNext() ) {
                 my $webtopic = $topicSet->next();
-                my ($Iweb, $topic) = Foswiki::Func::normalizeWebTopicName($web, $webtopic);
+                my ($Iweb, $topic) = Foswiki::Func::normalizeWebTopicName(
+                    $web, $webtopic);
 
                 if ( $topicMatches{$topic} ) {
                 } else {
@@ -174,11 +187,12 @@ sub search {
     my $sDir;
 
     if (ref($web)) {
-        # 1.0.9 and earlier had ($searchString, $topics, $options, $sDir)
-        # remap                 ($searchString, $web,    $topics,  $session
+        # 1.0.9 and earlier had ($searchString, \@topics, $options, $sDir)
+        # remap                 ($searchString, $web,    \@topics,  $session
         $sDir = $session;
         $options = $topics;
-        $topics = $web;
+        # add dir and extension to topic names
+        $topics = [ map { "$sDir/$_.txt" } @$web ];
     } else {
         $sDir = "$Foswiki::cfg{DataDir}/$web";
         # Flatten the iterator
