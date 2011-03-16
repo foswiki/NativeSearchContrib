@@ -4,7 +4,7 @@ package Foswiki::Contrib::NativeSearchContrib;
 use strict;
 
 our $VERSION          = '$Rev$';
-our $RELEASE          = '1.3';
+our $RELEASE          = '1.4';
 our $SHORTDESCRIPTION = 'Accelerated search for use with mod_perl';
 
 1;

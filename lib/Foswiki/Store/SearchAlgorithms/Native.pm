@@ -29,7 +29,6 @@ sub query {
     my ( $query, $inputTopicSet, $session, $options ) = @_;
 
     # These are loaded by require because 1.0 doesn't have them
-    require Foswiki::Search::InfoCache;
     require Foswiki::Search::ResultSet;
 
     if (( @{ $query->{tokens} } ) == 0) {
@@ -41,8 +40,18 @@ sub query {
     my $isAdmin = $session->{users}->isAdmin( $session->{user} );
 
     my $searchAllFlag = ( $webNames =~ /(^|[\,\s])(all|on)([\,\s]|$)/i );
-    my @webs = Foswiki::Search::InfoCache::_getListOfWebs(
-        $webNames, $recurse, $searchAllFlag );
+    my $webs;
+
+    my @webs;
+    eval "require Foswiki::Store::Interfaces::SearchAlgorithm";
+    if ($@) {
+	require Foswiki::Search::InfoCache;
+	@webs = Foswiki::Search::InfoCache::_getListOfWebs(
+	    $webNames, $recurse, $searchAllFlag );
+    } else {
+	@webs = Foswiki::Store::Interfaces::SearchAlgorithm::getListOfWebs(
+	    $webNames, $recurse, $searchAllFlag );
+    }
 
     my @resultCacheList;
     foreach my $web (@webs) {
