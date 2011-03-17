@@ -1,6 +1,4 @@
-# See bottom of file for license and copyright information
-package Foswiki::Store::SearchAlgorithms::Native;
-
+# See bottom of file for license and copyright information package Foswiki::Store::SearchAlgorithms::Native; 
 use Assert;
 use FoswikiNativeSearch ();
 
@@ -238,7 +236,7 @@ sub search {
 
             # Note use of / and \ as dir separators, to support
             # Winblows
-            if (/([^\/\\]*)\.txt(:(.*))?$/) {
+            if (/([^\/\\]*?)\.txt(:(.*))?$/) {
 
                 # Implicit untaint OK; data from search
                 push( @{ $seen{$1} }, $3 );
