@@ -1,4 +1,5 @@
-# See bottom of file for license and copyright information package Foswiki::Store::SearchAlgorithms::Native; 
+# See bottom of file for license and copyright information
+package Foswiki::Store::SearchAlgorithms::Native; 
 use Assert;
 use FoswikiNativeSearch ();
 
@@ -50,7 +51,6 @@ sub query {
 	@webs = Foswiki::Store::Interfaces::SearchAlgorithm::getListOfWebs(
 	    $webNames, $recurse, $searchAllFlag );
     }
-
     my @resultCacheList;
     foreach my $web (@webs) {
         # can't process what ain't thar
@@ -127,7 +127,9 @@ sub _webQuery {
             my @topicList;
             $topicSet->reset();
             while ( $topicSet->hasNext() ) {
-                my $topic = $topicSet->next();
+                my $webtopic = $topicSet->next();
+                my ( $itrWeb, $topic ) =
+                  Foswiki::Func::normalizeWebTopicName( $web, $webtopic );
 
                 if ( $options->{'casesensitive'} ) {
 
@@ -148,11 +150,12 @@ sub _webQuery {
         unless ( $options->{'scope'} eq 'topic' ) {
             $textMatches = search(
                 $tokenCopy, $web, $topicSet, $session, $options );
-        }
 
-        #bring the text matches into the topicMatch hash
-        if ($textMatches) {
-            @topicMatches{ keys %$textMatches } = values %$textMatches;
+	    #bring the text matches into the topicMatch hash
+	    if ($textMatches) {
+	print STDERR "NATIVE ".Data::Dumper->Dump([$textMatches])."\n";
+		@topicMatches{ keys %$textMatches } = values %$textMatches;
+	    }
         }
 
         my @scopeTextList = ();
@@ -173,7 +176,6 @@ sub _webQuery {
             #TODO: the sad thing about this is we lose info
             @scopeTextList = keys(%topicMatches);
         }
-
         # reduced topic list for next token
         $topicSet =
           new Foswiki::Search::InfoCache( $Foswiki::Plugins::SESSION, $web,
