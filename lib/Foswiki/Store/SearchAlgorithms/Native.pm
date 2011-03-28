@@ -86,7 +86,7 @@ sub query {
 sub _webQuery {
     my ( $query, $web, $inputTopicSet, $session, $options ) = @_;
     ASSERT( scalar( @{ $query->{tokens} } ) > 0 ) if DEBUG;
-    #print STDERR "ForkingSEARCH(".join(', ', @{ $query->{tokens} }).")\n";
+
     # default scope is 'text'
     $options->{'scope'} = 'text'
       unless ( defined( $options->{'scope'} )
@@ -102,7 +102,6 @@ sub _webQuery {
     }
     ASSERT( UNIVERSAL::isa( $topicSet, 'Foswiki::Iterator' ) ) if DEBUG;
 
-    #print STDERR "######## Forking search ($web) tokens "
     # .scalar(@{$query->{tokens}})." : ".join(',', @{$query->{tokens}})."\n";
     # AND search - search once for each token, ANDing result together
     foreach my $token ( @{ $query->{tokens} } ) {
@@ -153,7 +152,6 @@ sub _webQuery {
 
 	    #bring the text matches into the topicMatch hash
 	    if ($textMatches) {
-	print STDERR "NATIVE ".Data::Dumper->Dump([$textMatches])."\n";
 		@topicMatches{ keys %$textMatches } = values %$textMatches;
 	    }
         }
