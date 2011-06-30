@@ -1,11 +1,10 @@
 # See bottom of file for license and copyright information
-package Foswiki::Store::SearchAlgorithms::Native; 
+package Foswiki::Store::SearchAlgorithms::Native;
 use Foswiki::Store::Interfaces::QueryAlgorithm ();
 our @ISA = ('Foswiki::Store::Interfaces::QueryAlgorithm');
 
 use Assert;
 use FoswikiNativeSearch ();
-
 
 =begin TML
 
@@ -18,7 +17,6 @@ Rude and crude, this makes no attempt to handle UTF-8.
 
 =cut
 
-
 =begin TML
 
 ---++ ClassMethod new( $class,  ) -> $cereal
@@ -29,7 +27,6 @@ sub new {
     my $self = shift()->SUPER::new( 'SEARCH', @_ );
     return $self;
 }
-
 
 =begin TML
 
@@ -51,13 +48,13 @@ sub query {
     # These are loaded by require because 1.0 doesn't have them
     require Foswiki::Search::ResultSet;
 
-    if (( @{ $query->{tokens} } ) == 0) {
-        return new Foswiki::Search::InfoCache($session, '');
+    if ( ( @{ $query->{tokens} } ) == 0 ) {
+        return new Foswiki::Search::InfoCache( $session, '' );
     }
 
     my $webNames = $options->{web}       || '';
-    my $recurse = $options->{'recurse'} || '';
-    my $isAdmin = $session->{users}->isAdmin( $session->{user} );
+    my $recurse  = $options->{'recurse'} || '';
+    my $isAdmin  = $session->{users}->isAdmin( $session->{user} );
 
     my $searchAllFlag = ( $webNames =~ /(^|[\,\s])(all|on)([\,\s]|$)/i );
     my $webs;
@@ -65,15 +62,18 @@ sub query {
     my @webs;
     eval "require Foswiki::Store::Interfaces::SearchAlgorithm";
     if ($@) {
-	require Foswiki::Search::InfoCache;
-	@webs = Foswiki::Search::InfoCache::_getListOfWebs(
-	    $webNames, $recurse, $searchAllFlag );
-    } else {
-	@webs = Foswiki::Store::Interfaces::QueryAlgorithm::getListOfWebs(
-	    $webNames, $recurse, $searchAllFlag );
+        require Foswiki::Search::InfoCache;
+        @webs = Foswiki::Search::InfoCache::_getListOfWebs( $webNames, $recurse,
+            $searchAllFlag );
+    }
+    else {
+        @webs =
+          Foswiki::Store::Interfaces::QueryAlgorithm::getListOfWebs( $webNames,
+            $recurse, $searchAllFlag );
     }
     my @resultCacheList;
     foreach my $web (@webs) {
+
         # can't process what ain't thar
         next unless $session->webExists($web);
 
@@ -88,25 +88,28 @@ sub query {
             && !$isAdmin
             && ( $thisWebNoSearchAll =~ /on/i || $web =~ /^[\.\_]/ )
             && $web ne $session->{webName} );
-        
-        my $infoCache = $this->_webQuery(
-            $query, $web, $inputTopicSet, $session, $options);
-        $infoCache->sortResults( $options );
-        push(@resultCacheList, $infoCache);
-    }
-    my $resultset = new Foswiki::Search::ResultSet(
-        \@resultCacheList, $options->{groupby}, $options->{order},
-        Foswiki::isTrue( $options->{reverse} ));
-    #TODO: $options should become redundant
-    $resultset->sortResults( $options );
-        
-    #add permissions check
-    $resultset = Foswiki::Store::Interfaces::QueryAlgorithm::addACLFilter( $resultset, $options );
-    
-    #add paging if applicable.
-    return Foswiki::Store::Interfaces::QueryAlgorithm::addPager( $resultset, $options );
-}
 
+        my $infoCache =
+          $this->_webQuery( $query, $web, $inputTopicSet, $session, $options );
+        $infoCache->sortResults($options);
+        push( @resultCacheList, $infoCache );
+    }
+    my $resultset =
+      new Foswiki::Search::ResultSet( \@resultCacheList, $options->{groupby},
+        $options->{order}, Foswiki::isTrue( $options->{reverse} ) );
+
+    #TODO: $options should become redundant
+    $resultset->sortResults($options);
+
+    #add permissions check
+    $resultset =
+      Foswiki::Store::Interfaces::QueryAlgorithm::addACLFilter( $resultset,
+        $options );
+
+    #add paging if applicable.
+    return Foswiki::Store::Interfaces::QueryAlgorithm::addPager( $resultset,
+        $options );
+}
 
 #ok, for initial validation, naively call the code with a web.
 sub _webQuery {
@@ -119,12 +122,14 @@ sub _webQuery {
         && $options->{'scope'} =~ /^(topic|all)$/ );
 
     my $topicSet = $inputTopicSet;
-    if (!defined($topicSet)) {
+    if ( !defined($topicSet) ) {
+
         #then we start with the whole web
         #TODO: i'm sure that is a flawed assumption
         my $webObject = Foswiki::Meta->new( $session, $web );
-        $topicSet = Foswiki::Search::InfoCache::getTopicListIterator(
-            $webObject, $options );
+        $topicSet =
+          Foswiki::Search::InfoCache::getTopicListIterator( $webObject,
+            $options );
     }
     ASSERT( UNIVERSAL::isa( $topicSet, 'Foswiki::Iterator' ) ) if DEBUG;
 
@@ -133,7 +138,7 @@ sub _webQuery {
     foreach my $token ( @{ $query->{tokens} } ) {
 
         my $tokenCopy = $token;
-        
+
         # flag for AND NOT search
         my $invertSearch = 0;
         $invertSearch = ( $tokenCopy =~ s/^\!//o );
@@ -173,13 +178,13 @@ sub _webQuery {
         # scope='text', e.g. grep search on topic text:
         my $textMatches;
         unless ( $options->{'scope'} eq 'topic' ) {
-            $textMatches = search(
-                $tokenCopy, $web, $topicSet, $session, $options );
+            $textMatches =
+              search( $tokenCopy, $web, $topicSet, $session, $options );
 
-	    #bring the text matches into the topicMatch hash
-	    if ($textMatches) {
-		@topicMatches{ keys %$textMatches } = values %$textMatches;
-	    }
+            #bring the text matches into the topicMatch hash
+            if ($textMatches) {
+                @topicMatches{ keys %$textMatches } = values %$textMatches;
+            }
         }
 
         my @scopeTextList = ();
@@ -187,19 +192,22 @@ sub _webQuery {
             $topicSet->reset();
             while ( $topicSet->hasNext() ) {
                 my $webtopic = $topicSet->next();
-                my ($Iweb, $topic) = Foswiki::Func::normalizeWebTopicName(
-                    $web, $webtopic);
+                my ( $Iweb, $topic ) =
+                  Foswiki::Func::normalizeWebTopicName( $web, $webtopic );
 
                 if ( $topicMatches{$topic} ) {
-                } else {
-                    push( @scopeTextList, $topic );            
+                }
+                else {
+                    push( @scopeTextList, $topic );
                 }
             }
         }
         else {
+
             #TODO: the sad thing about this is we lose info
             @scopeTextList = keys(%topicMatches);
         }
+
         # reduced topic list for next token
         $topicSet =
           new Foswiki::Search::InfoCache( $Foswiki::Plugins::SESSION, $web,
@@ -219,27 +227,32 @@ sub search {
     my ( $searchString, $web, $topics, $session, $options ) = @_;
     my $sDir;
 
-    if (ref($web)) {
+    if ( ref($web) ) {
+
         # 1.0.9 and earlier had ($searchString, \@topics, $options, $sDir)
         # remap                 ($searchString, $web,    \@topics,  $session
-        $sDir = $session;
+        $sDir    = $session;
         $options = $topics;
+
         # add dir and extension to topic names
         $topics = [ map { "$sDir/$_.txt" } @$web ];
-    } else {
+    }
+    else {
         $sDir = "$Foswiki::cfg{DataDir}/$web";
+
         # Flatten the iterator
         my $it = $topics;
         $topics = [];
+
         # SMELL: why does the iterator have to be reset? There's nothing
         # in the POD docs to say why, but the unit tests (Fn_SEARCH) fail if
         # you don't reset it.
         $it->reset();
-        while ($it->hasNext()) {
+        while ( $it->hasNext() ) {
             my $wt = $it->next();
-            my ($Iweb, $tn) = Foswiki::Func::normalizeWebTopicName(
-                $web, $wt);
-            push(@$topics, "$sDir/$tn.txt");
+            my ( $Iweb, $tn ) =
+              Foswiki::Func::normalizeWebTopicName( $web, $wt );
+            push( @$topics, "$sDir/$tn.txt" );
         }
     }
     $searchString ||= '';
