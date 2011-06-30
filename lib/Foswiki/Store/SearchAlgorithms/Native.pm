@@ -1,9 +1,13 @@
 # See bottom of file for license and copyright information
 package Foswiki::Store::SearchAlgorithms::Native; 
+use Foswiki::Store::Interfaces::QueryAlgorithm ();
+our @ISA = ('Foswiki::Store::Interfaces::QueryAlgorithm');
+
 use Assert;
 use FoswikiNativeSearch ();
 
-=pod
+
+=begin TML
 
 ---+ package Foswiki::Store::SearchAlgorithms::Native
 
@@ -11,6 +15,23 @@ Native implementation of the RCS cache search. Requires tools/native_search
 to be built and installed.
 
 Rude and crude, this makes no attempt to handle UTF-8.
+
+=cut
+
+
+=begin TML
+
+---++ ClassMethod new( $class,  ) -> $cereal
+
+=cut
+
+sub new {
+    my $self = shift()->SUPER::new( 'SEARCH', @_ );
+    return $self;
+}
+
+
+=begin TML
 
 ---++ query($searchString, $topics, $options, $sDir) -> \%seen
 Search .txt files in $dir for $string. See RcsFile::searchInWebContent
@@ -25,7 +46,7 @@ sensible way to enable re-use.
 =cut
 
 sub query {
-    my ( $query, $inputTopicSet, $session, $options ) = @_;
+    my ( $this, $query, $inputTopicSet, $session, $options ) = @_;
 
     # These are loaded by require because 1.0 doesn't have them
     require Foswiki::Search::ResultSet;
@@ -48,7 +69,7 @@ sub query {
 	@webs = Foswiki::Search::InfoCache::_getListOfWebs(
 	    $webNames, $recurse, $searchAllFlag );
     } else {
-	@webs = Foswiki::Store::Interfaces::SearchAlgorithm::getListOfWebs(
+	@webs = Foswiki::Store::Interfaces::QueryAlgorithm::getListOfWebs(
 	    $webNames, $recurse, $searchAllFlag );
     }
     my @resultCacheList;
@@ -78,7 +99,12 @@ sub query {
         Foswiki::isTrue( $options->{reverse} ));
     #TODO: $options should become redundant
     $resultset->sortResults( $options );
-    return $resultset;
+        
+    #add permissions check
+    $resultset = Foswiki::Store::Interfaces::QueryAlgorithm::addACLFilter( $resultset, $options );
+    
+    #add paging if applicable.
+    return Foswiki::Store::Interfaces::QueryAlgorithm::addPager( $resultset, $options );
 }
 
 
