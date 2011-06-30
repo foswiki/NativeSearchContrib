@@ -89,7 +89,7 @@ sub query {
             && ( $thisWebNoSearchAll =~ /on/i || $web =~ /^[\.\_]/ )
             && $web ne $session->{webName} );
         
-        my $infoCache = _webQuery(
+        my $infoCache = $this->_webQuery(
             $query, $web, $inputTopicSet, $session, $options);
         $infoCache->sortResults( $options );
         push(@resultCacheList, $infoCache);
@@ -110,7 +110,7 @@ sub query {
 
 #ok, for initial validation, naively call the code with a web.
 sub _webQuery {
-    my ( $query, $web, $inputTopicSet, $session, $options ) = @_;
+    my ( $this, $query, $web, $inputTopicSet, $session, $options ) = @_;
     ASSERT( scalar( @{ $query->{tokens} } ) > 0 ) if DEBUG;
 
     # default scope is 'text'
@@ -276,7 +276,7 @@ sub search {
 __END__
 Authors: Crawford Currie http://c-dot.co.uk, Sven Dowideit
 
-Copyright (C) 2008-2010 Foswiki Contributors. All Rights Reserved.
+Copyright (C) 2008-2011 Foswiki Contributors. All Rights Reserved.
 Foswiki Contributors are listed in the AUTHORS file in the root
 of this distribution. NOTE: Please extend that file, not this notice.
 
