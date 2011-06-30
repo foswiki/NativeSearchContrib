@@ -103,11 +103,11 @@ sub query {
 
     #add permissions check
     $resultset =
-      Foswiki::Store::Interfaces::QueryAlgorithm::addACLFilter( $resultset,
+      $this->addACLFilter( $resultset,
         $options );
 
     #add paging if applicable.
-    return Foswiki::Store::Interfaces::QueryAlgorithm::addPager( $resultset,
+    return $this->addPager( $resultset,
         $options );
 }
 
